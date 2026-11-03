@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   version: "2.4.0"
-  build: 1
+  build: 2
   cuda: ${{ cuda_compiler_version != "None" }}
   cuda_major: ${{ (cuda_compiler_version | default("None") | split(".") | list)[0] }}
   # Prefer the most optimised x86_64 microarchitecture, then CUDA builds.
