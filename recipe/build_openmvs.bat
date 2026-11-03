@@ -38,6 +38,8 @@ cmake -S . -B build -G Ninja %CMAKE_ARGS% ^
   %CUDA_ARGS% ^
   -DOpenMVS_USE_PYTHON=OFF ^
   -DOpenMVS_BUILD_VIEWER=ON ^
+  -DGlad_DIR=%BUILD_PREFIX%/Library/lib/cmake/Glad ^
+  -DPython_EXECUTABLE=%BUILD_PREFIX%/python.exe ^
   -DVIEWER_NAME=OpenMVSViewer ^
   -DOpenMVS_USE_BREAKPAD=OFF ^
   -DOpenMVS_ENABLE_TESTS=ON ^
