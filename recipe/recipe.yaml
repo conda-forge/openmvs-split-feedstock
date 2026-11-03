@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   version: "2.4.0"
-  build: 0
+  build: 1
   cuda: ${{ cuda_compiler_version != "None" }}
   cuda_major: ${{ (cuda_compiler_version | default("None") | split(".") | list)[0] }}
   # Prefer the most optimised x86_64 microarchitecture, then CUDA builds.
@@ -57,6 +57,13 @@ source:
     # OpenMVSViewer: generic Viewer names clash, e.g. embree's bin/viewer); fix
     # the desktop entry's Exec path (not upstream yet)
     - patches/0013-Viewer-name-the-installed-icon-and-.reg-after-VIEWER.patch
+    # Metal PatchMatch backend backported from upstream develop (cdcseacave/openMVS#1279)
+    - patches/0014-Backport-the-Metal-compute-backend-for-PatchMatch-de.patch
+    # protect the reference depth-map from cache ejection in fusion (cdcseacave/openMVS#1321)
+    - patches/0015-Protect-the-reference-depth-map-from-cache-ejection-.patch
+    # Viewer with GLAD 2 (glad2-cmake generates the loader at build time); GLAD 1
+    # is not on conda-forge for linux-aarch64 (not upstream yet)
+    - patches/0016-Viewer-support-GLAD-2.patch
 
 build:
   number: ${{ build_number }}
@@ -83,6 +90,9 @@ outputs:
         - cmake
         - ninja
         - pkg-config
+        # the Viewer's OpenGL loader is generated at build time (python -m glad)
+        - python >=3.10
+        - glad2-cmake
       host:
         # Eigen types are part of OpenMVS's public headers: eigen-abi-devel, at the
         # same microarch level as the build (EIGEN_MAX_ALIGN_BYTES)
@@ -97,7 +107,9 @@ outputs:
           then:
             - cuda-version ==${{ cuda_compiler_version }}
             - cuda-cudart-dev
-            - cuda-driver-dev
+            # no cuda-driver-dev package on Windows (the driver library comes with cudart-dev there)
+            - if: not win
+              then: cuda-driver-dev
             - libcurand-dev
         - libboost-devel
         - eigen
@@ -116,7 +128,6 @@ outputs:
         - libjxl
         - zlib
         # Viewer
-        - glad
         - glfw
         - imgui
         # imgui's CMake config also requires SDL2 and Vulkan
@@ -149,8 +160,11 @@ outputs:
             then: if ( /sbin/ldconfig -p 2>/dev/null || true ) | grep -q "libcuda.so.1"; then for t in DensifyPointCloud InterfaceCOLMAP ReconstructMesh RefineMesh TextureMesh; do $t --help > help.txt || test $? -eq 1; grep -q "Available options" help.txt; done; else echo "no CUDA driver, not running the tools"; fi
           # Windows: the console log may open its own console instead of writing to
           # the redirected stdout, so also look in the log file each tool writes
-          - if: win
+          - if: win and not cuda
             then: for %%t in (DensifyPointCloud InterfaceCOLMAP ReconstructMesh RefineMesh TextureMesh) do (call %%t --help > help.txt 2>&1 & type help.txt & findstr /M /C:"Available options" help.txt %%t-*.log || exit 1)
+          # CUDA builds need nvcuda.dll (the driver) to start
+          - if: win and cuda
+            then: if exist %SystemRoot%\System32\nvcuda.dll (for %%t in (DensifyPointCloud InterfaceCOLMAP ReconstructMesh RefineMesh TextureMesh) do (call %%t --help > help.txt 2>&1 & type help.txt & findstr /M /C:"Available options" help.txt %%t-*.log || exit 1)) else (echo no CUDA driver, not running the tools)
       - package_contents:
           files:
             exists:
@@ -232,7 +246,9 @@ outputs:
           then:
             - cuda-version ==${{ cuda_compiler_version }}
             - cuda-cudart-dev
-            - cuda-driver-dev
+            # no cuda-driver-dev package on Windows (the driver library comes with cudart-dev there)
+            - if: not win
+              then: cuda-driver-dev
             - libcurand-dev
         - libboost-devel
         - libboost-python-devel
