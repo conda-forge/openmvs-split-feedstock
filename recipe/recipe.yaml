@@ -2,11 +2,11 @@ schema_version: 1
 
 context:
   version: "2.4.0"
-  build: 0
+  build: 1
   cuda: ${{ cuda_compiler_version != "None" }}
   cuda_major: ${{ (cuda_compiler_version | default("None") | split(".") | list)[0] }}
   # Prefer the most optimised x86_64 microarchitecture, then CUDA builds.
-  build_number: ${{ build + 100 * (microarch_level | default(1) | int - 1) + (50 if cuda else 0) }}
+  build_number: 1
 
 recipe:
   name: openmvs-split
