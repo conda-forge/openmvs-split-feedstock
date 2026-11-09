@@ -291,8 +291,9 @@ outputs:
             then: python -c "import pyOpenMVS; print(pyOpenMVS.Scene())"
       - package_contents:
           files:
+            # Python <= 3.14 on Windows: Lib/site-packages; >= 3.15: lib/python/site-packages
             - if: win
-              then: Lib/site-packages/pyOpenMVS.pyd
+              then: "{Lib,lib/python}/site-packages/pyOpenMVS.pyd"
               else: lib/python*/site-packages/pyOpenMVS.so
 
 about:
