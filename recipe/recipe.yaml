@@ -94,7 +94,7 @@ outputs:
           then: ${{ compiler('cuda') }}
         - cmake
         - ninja
-        - pkg-config
+        - pkgconf
         # the Viewer's OpenGL loader is generated at build time (python -m glad)
         - python >=3.10
         - glad2-cmake
@@ -230,7 +230,7 @@ outputs:
           then: ${{ compiler('cuda') }}
         - cmake
         - ninja
-        - pkg-config
+        - pkgconf
         - if: build_platform != target_platform
           then:
             - python
