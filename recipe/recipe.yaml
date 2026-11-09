@@ -66,7 +66,8 @@ source:
     - patches/0016-Viewer-support-GLAD-2.patch
     # pyOpenMVS (Windows, in-tree) gets Python's include directory from the
     # Python3::Module target, not by chance from %PREFIX%\include: Python 3.15
-    # on Windows has its headers in include\python (backport of upstream 541b0e9)
+    # on Windows has its headers in include\python (backport: fixed upstream in
+    # e2f38b4 by cDc, cdcseacave/openMVS#1294, building on #1273 by Aljoscha Rheinwalt)
     - patches/0017-Link-pyOpenMVS-to-Python3-Module-for-the-Python-head.patch
 
 build:

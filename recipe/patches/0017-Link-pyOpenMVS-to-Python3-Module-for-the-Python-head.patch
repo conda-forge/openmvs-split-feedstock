@@ -1,13 +1,22 @@
-From f9dd246723d1e65d405f58dc9e93d4cd02dd9163 Mon Sep 17 00:00:00 2001
-From: Tobias Fischer <tobias.fischer@qut.edu.au>
-Date: Mon, 9 Nov 2026 12:51:53 +1000
+From e2f38b4f7fe90f95cc06b0989cf45bf9d0456985 Mon Sep 17 00:00:00 2001
+From: cDc <cdc.seacave@gmail.com>
+Date: Tue, 18 Aug 2026 07:00:28 +0000
 Subject: [PATCH] Link pyOpenMVS to Python3::Module for the Python headers
+
+Backport of the pyOpenMVS part of upstream commit e2f38b4 ("fixes:
+consolidate contributor fixes for IO, texturing, and builds",
+cdcseacave/openMVS#1294), which links pyOpenMVS to Python3::Module. That
+change builds on cdcseacave/openMVS#1273 by Aljoscha Rheinwalt, which first
+linked pyOpenMVS to Python's imported target and its include directories.
 
 pyOpenMVS linked only MVS and ${Python3_LIBRARIES}, so it never got
 Python3_INCLUDE_DIRS and compiled only when Python's headers happened to
-be on another include path. Link the Python3::Module target, which carries
-them (as upstream develop does since 541b0e9). Python 3.15 on Windows
-installs its headers in include/python, where nothing else points.
+be on another include path. Python 3.15 on Windows installs its headers in
+include/python, where nothing else points.
+
+Backported to 2.4.0 by Tobias Fischer <tobias.fischer@qut.edu.au>.
+
+Co-authored-by: Aljoscha Rheinwalt <aljoscha.rheinwalt@uni-potsdam.de>
 ---
  libs/MVS/CMakeLists.txt | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
