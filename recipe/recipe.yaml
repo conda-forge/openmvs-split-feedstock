@@ -64,6 +64,10 @@ source:
     # Viewer with GLAD 2 (glad2-cmake generates the loader at build time); GLAD 1
     # is not on conda-forge for linux-aarch64 (not upstream yet)
     - patches/0016-Viewer-support-GLAD-2.patch
+    # pyOpenMVS (Windows, in-tree) gets Python's include directory from the
+    # Python3::Module target, not by chance from %PREFIX%\include: Python 3.15
+    # on Windows has its headers in include\python (backport of upstream 541b0e9)
+    - patches/0017-Link-pyOpenMVS-to-Python3-Module-for-the-Python-head.patch
 
 build:
   number: ${{ build_number }}

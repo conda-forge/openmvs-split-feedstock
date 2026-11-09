@@ -1,0 +1,30 @@
+From f9dd246723d1e65d405f58dc9e93d4cd02dd9163 Mon Sep 17 00:00:00 2001
+From: Tobias Fischer <tobias.fischer@qut.edu.au>
+Date: Mon, 9 Nov 2026 12:51:53 +1000
+Subject: [PATCH] Link pyOpenMVS to Python3::Module for the Python headers
+
+pyOpenMVS linked only MVS and ${Python3_LIBRARIES}, so it never got
+Python3_INCLUDE_DIRS and compiled only when Python's headers happened to
+be on another include path. Link the Python3::Module target, which carries
+them (as upstream develop does since 541b0e9). Python 3.15 on Windows
+installs its headers in include/python, where nothing else points.
+---
+ libs/MVS/CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libs/MVS/CMakeLists.txt b/libs/MVS/CMakeLists.txt
+index ac95177..87d31a8 100644
+--- a/libs/MVS/CMakeLists.txt
++++ b/libs/MVS/CMakeLists.txt
+@@ -87,7 +87,7 @@ if(OpenMVS_USE_PYTHON)
+ 	if(_USE_CUDA)
+ 		SET_TARGET_PROPERTIES(pyOpenMVS PROPERTIES CUDA_ARCHITECTURES "50;72;75")
+ 	endif()
+-	TARGET_LINK_LIBRARIES(pyOpenMVS PRIVATE MVS)
++	TARGET_LINK_LIBRARIES(pyOpenMVS PRIVATE MVS Python3::Module)
+ 	# Suppress prefix "lib" because Python does not allow this prefix
+ 	SET_TARGET_PROPERTIES(pyOpenMVS PROPERTIES PREFIX "")
+ 	# Install
+-- 
+2.53.0
+
