@@ -2,7 +2,7 @@ schema_version: 1
 
 context:
   version: "2.4.0"
-  build: 1
+  build: 2
   cuda: ${{ cuda_compiler_version != "None" }}
   cuda_major: ${{ (cuda_compiler_version | default("None") | split(".") | list)[0] }}
   # Prefer the most optimised x86_64 microarchitecture, then CUDA builds.
@@ -64,6 +64,11 @@ source:
     # Viewer with GLAD 2 (glad2-cmake generates the loader at build time); GLAD 1
     # is not on conda-forge for linux-aarch64 (not upstream yet)
     - patches/0016-Viewer-support-GLAD-2.patch
+    # pyOpenMVS (Windows, in-tree) gets Python's include directory from the
+    # Python3::Module target, not by chance from %PREFIX%\include: Python 3.15
+    # on Windows has its headers in include\python (backport: fixed upstream in
+    # e2f38b4 by cDc, cdcseacave/openMVS#1294, building on #1273 by Aljoscha Rheinwalt)
+    - patches/0017-Link-pyOpenMVS-to-Python3-Module-for-the-Python-head.patch
 
 build:
   number: ${{ build_number }}
@@ -89,7 +94,7 @@ outputs:
           then: ${{ compiler('cuda') }}
         - cmake
         - ninja
-        - pkg-config
+        - pkgconf
         # the Viewer's OpenGL loader is generated at build time (python -m glad)
         - python >=3.10
         - glad2-cmake
@@ -225,7 +230,7 @@ outputs:
           then: ${{ compiler('cuda') }}
         - cmake
         - ninja
-        - pkg-config
+        - pkgconf
         - if: build_platform != target_platform
           then:
             - python
@@ -286,8 +291,9 @@ outputs:
             then: python -c "import pyOpenMVS; print(pyOpenMVS.Scene())"
       - package_contents:
           files:
+            # Python <= 3.14 on Windows: Lib/site-packages; >= 3.15: lib/python/site-packages
             - if: win
-              then: Lib/site-packages/pyOpenMVS.pyd
+              then: "{Lib,lib/python}/site-packages/pyOpenMVS.pyd"
               else: lib/python*/site-packages/pyOpenMVS.so
 
 about:
