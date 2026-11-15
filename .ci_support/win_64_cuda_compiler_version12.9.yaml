@@ -23,7 +23,7 @@ libboost_python_devel:
 libjpeg_turbo:
 - '3'
 libjxl:
-- '0.12'
+- '0.13'
 libopencv:
 - 5.0.0
 libpng:
