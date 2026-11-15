@@ -2,11 +2,13 @@ schema_version: 1
 
 context:
   version: "2.4.0"
-  build: 2
+  build: 3
   cuda: ${{ cuda_compiler_version != "None" }}
   cuda_major: ${{ (cuda_compiler_version | default("None") | split(".") | list)[0] }}
   # Prefer the most optimised x86_64 microarchitecture, then CUDA builds.
-  build_number: ${{ build + 100 * (microarch_level | default(1) | int - 1) + (50 if cuda else 0) }}
+  # (Not named build_number: the bot sets every context key named build,
+  # build_number, number or build_num to the new build number.)
+  variant_build_number: ${{ build + 100 * (microarch_level | default(1) | int - 1) + (50 if cuda else 0) }}
 
 recipe:
   name: openmvs-split
@@ -71,14 +73,14 @@ source:
     - patches/0017-Link-pyOpenMVS-to-Python3-Module-for-the-Python-head.patch
 
 build:
-  number: ${{ build_number }}
+  number: ${{ variant_build_number }}
 
 outputs:
   - package:
       name: openmvs
     build:
-      number: ${{ build_number }}
-      string: ${{ ("cuda" ~ cuda_major) if cuda else "cpu" }}_h${{ hash }}_${{ build_number }}
+      number: ${{ variant_build_number }}
+      string: ${{ ("cuda" ~ cuda_major) if cuda else "cpu" }}_h${{ hash }}_${{ variant_build_number }}
       script:
         - if: win
           then: call %RECIPE_DIR%\build_openmvs.bat
@@ -212,8 +214,8 @@ outputs:
   - package:
       name: pyopenmvs
     build:
-      number: ${{ build_number }}
-      string: py${{ python | version_to_buildstring }}${{ ("cuda" ~ cuda_major) if cuda else "cpu" }}_h${{ hash }}_${{ build_number }}
+      number: ${{ variant_build_number }}
+      string: py${{ python | version_to_buildstring }}${{ ("cuda" ~ cuda_major) if cuda else "cpu" }}_h${{ hash }}_${{ variant_build_number }}
       script:
         - if: win
           then: call %RECIPE_DIR%\build_pyopenmvs.bat
